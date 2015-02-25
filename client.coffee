@@ -20,9 +20,9 @@ exports.render = !->
 		renderHunt Page.state.get(0), Page.state.get(1)
 			# when a second id is passed along that photo is rendered without other stuff around it
 		return
-	
+
 	rankings = Obs.create()
-	Db.shared.ref('hunts').observeEach (hunt) !->
+	Db.shared.ref('tahunts').observeEach (hunt) !->
 		if hunt.get('winner')
 			userWon = hunt.get('photos', hunt.get('winner'), 'userId')
 			rankings.incr userWon, 10
@@ -40,7 +40,7 @@ exports.render = !->
 
 	Dom.h1 !->
 		Dom.style textAlign: 'center'
-		Dom.text tr "Best Hunters"
+		Dom.text tr "Beste TA'ers"
 
 	meInTop3 = false
 	Dom.div !->
@@ -49,7 +49,7 @@ exports.render = !->
 		if !rankings.get(sorted[0])
 			Dom.div !->
 				Dom.style Flex: 1, textAlign: 'center', padding: '10px'
-				Dom.text tr("No photos have been submitted yet")
+				Dom.text tr("Nog geen foto's gemaakt")
 		else
 			for i in [0..Math.min(2, sorted.length-1)] then do (i) !->
 				Dom.div !->
@@ -66,7 +66,7 @@ exports.render = !->
 	if !meInTop3
 		Dom.div !->
 			Dom.style fontSize: '75%', fontStyle: 'italic', paddingBottom: '8px', textAlign: 'center'
-			Dom.text tr("(You have %1 point|s)", rankings.get(Plugin.userId())||0)
+			Dom.text tr("(Je hebt %1 punt|en)", rankings.get(Plugin.userId())||0)
 
 	Ui.list !->
 		# next hunt
@@ -75,7 +75,7 @@ exports.render = !->
 				Dom.style width: '70px', height: '70px', marginRight: '10px', Box: 'center middle'
 				Icon.render data: 'clock2', color: '#aaa', style: { display: 'block' }, size: 34
 			Dom.div !->
-				Dom.div tr("A new Hunt will start")
+				Dom.div tr("Een nieuwe hunt begint over")
 				Dom.div !->
 					Dom.style fontSize: '120%', fontWeight: 'bold'
 					Time.deltaText Db.shared.get('next')
@@ -84,22 +84,22 @@ exports.render = !->
 				requestNewHunt = !->
 					Server.call 'newHunt', 1, (done) !->
 						if (done)
-							require('modal').show tr("No more hunts"), tr("All hunts have taken place, contact the Happening makers about adding new hunts!")
+							require('modal').show tr("No more hunts"), tr("All hunts have taken place, contact the Happening makers about adding Nieuwe Hunts!")
 				if Plugin.userId() is Plugin.ownerId()
-					require('modal').show tr("New Hunt"), tr("Every day a new Hunt wil start somewhere between 10am and 10pm. You however (and admins), can trigger a new hunt manually (you added the Photo Hunt)."), (option) !->
+					require('modal').show tr("Nieuwe Hunt"), tr("Every day a Nieuwe Hunt wil start somewhere between 10am and 10pm. You however (and admins), can trigger a Nieuwe Hunt manually (you added the TA Foto Hunt)."), (option) !->
 						if option is 'new'
 							requestNewHunt()
-					, ['cancel', tr("Cancel"), 'new', tr("New Hunt")]
+					, ['cancel', tr("Cancel"), 'new', tr("Nieuwe Hunt")]
 				else if Plugin.userIsAdmin()
-					require('modal').show tr("New Hunt"), tr("Every day a new Hunt wil start somewhere between 10am and 10pm. Admins however (and %1, who added the Photo Hunt), can trigger a new hunt manually.", Plugin.userName(Plugin.ownerId())), (option) !->
+					require('modal').show tr("Nieuwe Hunt"), tr("Every day a Nieuwe Hunt wil start somewhere between 10am and 10pm. Admins however (and %1, who added the TA Foto Hunt), can trigger a Nieuwe Hunt manually.", Plugin.userName(Plugin.ownerId())), (option) !->
 						if option is 'new'
 							requestNewHunt()
-					, ['cancel', tr("Cancel"), 'new', tr("New Hunt")]
+					, ['cancel', tr("Cancel"), 'new', tr("Nieuwe Hunt")]
 				else
-					require('modal').show tr("New Hunt"), tr("Every day a new Hunt wil start somewhere between 10am and 10pm, unless an admin or %1 (who added the Photo Hunt) trigger a new hunt manually.", Plugin.userName(Plugin.ownerId()))
+					require('modal').show tr("Nieuwe Hunt"), tr("Every day a Nieuwe Hunt wil start somewhere between 10am and 10pm, unless an admin or %1 (who added the TA Foto Hunt) trigger a Nieuwe Hunt manually.", Plugin.userName(Plugin.ownerId()))
 
 
-		Db.shared.observeEach 'hunts', (hunt) !->
+		Db.shared.observeEach 'tahunts', (hunt) !->
 			Ui.item !->
 				log 'hunt', hunt.get()
 				winningPhoto = hunt.ref('photos', hunt.get('winner'))
@@ -125,7 +125,7 @@ exports.render = !->
 						Dom.div !->
 							Ui.unread unread, null, {marginLeft: '4px'}
 				else
-					showAsNewest = +hunt.key() is +Db.shared.get('hunts', 'maxId') and Plugin.created() isnt hunt.get('time')
+					showAsNewest = +hunt.key() is +Db.shared.get('tahunts', 'maxId') and Plugin.created() isnt hunt.get('time')
 					Dom.div !->
 						Dom.style width: '70px', height: '70px', marginRight: '10px', Box: 'center middle'
 						Icon.render
@@ -136,7 +136,7 @@ exports.render = !->
 					Dom.div !->
 						Dom.style Flex: 1, fontSize: '120%'
 						if showAsNewest
-							Dom.text tr "Take a photo of you.."
+							Dom.text tr "Maak een foto..."
 							Dom.div !->
 								Dom.style fontSize: '120%', fontWeight: 'bold', color: Colors.highlight
 								Dom.text hunt.get('subject')
@@ -144,7 +144,7 @@ exports.render = !->
 							Dom.text hunt.get('subject')
 							Dom.div !->
 								Dom.style fontSize: '75%', marginTop: '6px'
-								Dom.text tr("Winner gets %1 points", 10)
+								Dom.text tr("De eerste krijgt %1 punten", 10)
 								if (cnt = hunt.count('photos').get()-1) > 0
 									Dom.text ' (' + tr("%1 disqualified |runner-up|runners-up", cnt) + ')'
 
@@ -162,10 +162,10 @@ exports.render = !->
 
 renderHunt = (huntId, photoId) !->
 	Dom.style padding: 0
-	Page.setTitle Db.shared.get('hunts', huntId, 'subject')
+	Page.setTitle Db.shared.get('tahunts', huntId, 'subject')
 
-	winnerId = Db.shared.get 'hunts', huntId, 'winner'
-	photos = Db.shared.ref 'hunts', huntId, 'photos'
+	winnerId = Db.shared.get 'tahunts', huntId, 'winner'
+	photos = Db.shared.ref 'tahunts', huntId, 'photos'
 	if photoId
 		mainPhoto = photos.ref photoId
 	else
@@ -187,7 +187,7 @@ renderHunt = (huntId, photoId) !->
 				require('modal').show null, question, (option) !->
 					if option isnt 'cancel'
 						Server.sync 'removePhoto', huntId, mainPhoto.key(), (option is 'disqualify'), !->
-							Db.shared.remove 'hunts', huntId, 'winner'
+							Db.shared.remove 'tahunts', huntId, 'winner'
 							if option is 'disqualify'
 								photos.set mainPhoto.key(), 'disqualified', true
 							else
@@ -204,12 +204,12 @@ renderHunt = (huntId, photoId) !->
 
 	if !photoId
 		allowUpload = Obs.create(true) # when the current use has no photos yet, allow upload
-		Db.shared.observeEach 'hunts', huntId, 'photos', (photo) !->
+		Db.shared.observeEach 'tahunts', huntId, 'photos', (photo) !->
 			return if +photo.get('userId') isnt Plugin.userId()
 			allowUpload.set false
 			Obs.onClean !->
 				allowUpload.set true
-	
+
 	Dom.div !->
 		Dom.style backgroundColor: '#fff', paddingBottom: '2px', borderBottom: '2px solid #ccc'
 		# main photo
@@ -249,7 +249,7 @@ renderHunt = (huntId, photoId) !->
 
 		# we're only rendering other submissions and comments when it's the winner being displayed
 		if !photoId
-			photos = Db.shared.ref 'hunts', huntId, 'photos'
+			photos = Db.shared.ref 'tahunts', huntId, 'photos'
 			# do we have a winner, or runner-ups?
 			if winnerId or photos.count().get()>(1 + if winnerId then 1 else 0)
 				Dom.div !->
